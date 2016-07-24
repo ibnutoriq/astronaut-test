@@ -6,6 +6,7 @@
     <title>Astronaut Test</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="{!! asset('css/nprogress.css') !!}">
+    <link rel="stylesheet" href="{!! asset('css/style.css') !!}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.2.1/react.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.2.1/react-dom.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>

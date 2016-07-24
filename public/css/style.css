@@ -1,0 +1,25 @@
+.video-wrap {
+  display: inline-block;
+  width: 100%;
+}
+
+.img-video {
+  width: 245px;
+  text-align: center;
+}
+
+.img-video > img {
+  max-width: 100%;
+}
+
+.btn-edit {
+  width: 50%;
+  display: inline-block;
+  text-align: center;
+}
+
+.btn-remove {
+  width: 50%;
+  display: inline-block;
+  text-align: center;
+}

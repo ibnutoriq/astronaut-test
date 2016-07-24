@@ -4,15 +4,18 @@ namespace App\Http\Controllers;
 
 use Log;
 
+use Validator;
+
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
+
+use App\Video;
 
 class VideosController extends Controller
 {
     // Use this page as root path
     public function index() {
-      Log::info('Showing user profile for user: ');
       return view('videos.index');
     }
 
@@ -22,11 +25,28 @@ class VideosController extends Controller
     }
 
     public function create(Request $request) {
-      Log::info('Showing user profile for user: ');
-      $video = $request->input('video');
-      $newVideo = new Video;
-      $newVideo->video = $video;
-      $newVideo->save();
+      $validator = Validator::make($request->all(), [
+        'name' => 'required',
+        'video_file' => 'required'
+      ]);
 
+      if ($validator->fails()) {
+        return response()->json($validator->errors());
+      } else {
+        $video = new Video(array(
+          'name' => $request->get('name')
+        ));
+
+        $video->save();
+
+        $imageName = $video->id . '.' .
+          $request->file('video_file')->getClientOriginalExtension();
+
+        $request->file('video_file')->move(
+          base_path() . '/public/videos/', $imageName
+        );
+
+        return response()->json($video);
+      }
     }
 }

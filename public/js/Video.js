@@ -16,33 +16,54 @@ var VideoForm = React.createClass({
       </form>
     );
   }
-})
+});
+
+var VideoList = React.createClass({
+  render: function() {
+    return(
+      <div className='row'>
+        <div className='col-md-12'>
+          <div className='col-md-3'>
+            <div className='thumbnail video-wrap'>
+              <div className='img-video'>
+                <img src='http://placehold.it/400x400' />
+              </div>
+              <div className='title'>
+                <h4>title</h4>
+              </div>
+              <div className='action-btn'>
+                <div className='btn-edit'>
+                  <a href='javascript:void(0)' className='btn btn-success'>edit</a>
+                </div>
+                <div className='btn-remove'>
+                  <a href='javascript:void(0)' className='btn btn-danger'>remove</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+});
 
 var Video = React.createClass({
-  getInitialState() {
+  getInitialState: function() {
     return {
-
-    };
+      getVideoValue: {}
+    }
   },
   handleSubmitClick: function() {
     var name = $('.js-video-name').val();
-    var video_file = $('.js-video-video-file').val();
-    var video = {};
-
-    if (!_.isEmpty(name)) {
-      video['name'] = name;
-    }
-
-    if (!_.isEmpty(video_file)) {
-      video['video_file'] = video_file;
-    }
+    var video_file = $('.js-video-video-file').value;
 
     $.ajax({
-      url: '/videos',
+      url: '/videos/create',
       method: 'POST',
       dataType: 'JSON',
       data: {
-        video: video
+        name: name,
+        video_file: video_file
       },
       beforeSend: function() {
         NProgress.start();
@@ -52,14 +73,21 @@ var Video = React.createClass({
     .fail(this.fetchDataFail)
   },
   fetchDataDone: function(data, textStatus, jqXHR) {
-
+    this.setState({
+      getVideoValue: data
+    });
+    NProgress.done();
   },
   fetchDataFail: function(xhr, status, err) {
-
+    console.log(err);
+    NProgress.done();
   },
   render: function() {
     return(
-      <VideoForm handleSubmitClick={this.handleSubmitClick} />
+      <div className='container'>
+        <VideoForm handleSubmitClick={this.handleSubmitClick} />
+        <VideoList />
+      </div>
     );
   }
 });

@@ -14,7 +14,7 @@
 Route::get('/', 'VideosController@index');
 Route::get('/videos/all', 'VideosController@all');
 //route for inserting
-Route::post('/videos', 'VideosController@create');
+Route::post('/videos/create', 'VideosController@create');
 //route for edit
 Route::get('/videos/:id/edit', 'VideosController@edit');
 //route for updating
