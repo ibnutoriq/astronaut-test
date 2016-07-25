@@ -171,7 +171,7 @@ var Video = React.createClass({
   },
   handleRemoveClick: function(e) {
     $.ajax({
-      url: '/videos/' + e.target.dataset.id,
+      url: '/videos/' + e.target.dataset.id + '?_token=' + $('input[name="_token"]').val(),
       method: 'DELETE',
       dataType: 'JSON',
       beforeSend: function() {
@@ -191,7 +191,6 @@ var Video = React.createClass({
   },
   componentDidMount: function() {
     this.fetchVideoList();
-    this.handleRemoveClick();
   },
   resetForm: function() {
     $('#js-video-form')[0].reset();

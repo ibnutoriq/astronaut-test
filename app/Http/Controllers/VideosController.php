@@ -6,6 +6,8 @@ use Log;
 
 use Validator;
 
+use File;
+
 use Carbon\Carbon;
 
 use Illuminate\Http\Request;
@@ -55,7 +57,9 @@ class VideosController extends Controller
     }
 
     public function destroy($id) {
-      Video::destroy($id);
+      $video = Video::find($id);
+      File::Delete('videos/' . $video->filename);
+      $video->delete();
       return response(200);
     }
 }
