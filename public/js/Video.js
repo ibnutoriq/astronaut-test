@@ -179,6 +179,20 @@ var Video = React.createClass({
   fetchDataDone: function(data, textStatus, jqXHR) {
     this.resetForm();
     this.setState({
+      getVideosValue: []
+    })
+    this.setState({
+      getVideoValue: {}
+    })
+    this.fetchVideoList();
+    NProgress.done();
+  },
+  fetchDataUpdateDone: function(data, textStatus, jqXHR) {
+    this.resetForm();
+    this.setState({
+      getVideosValue: []
+    })
+    this.setState({
       getVideoValue: {}
     })
     this.fetchVideoList();
