@@ -139,11 +139,7 @@ var Video = React.createClass({
     xhr.fail(this.fetchDataFail);
   },
   fetchDataDone: function(data, textStatus, jqXHR) {
-    var videos = this.state.getVideosValue;
-    videos.unshift(data);
-    this.setState({
-      getVideosValue: videos
-    });
+    this.fetchVideoList();
     NProgress.done();
   },
   fetchDataFail: function(errors) {

@@ -23,7 +23,7 @@ class VideosController extends Controller
 
     // This page contain list of videos
     public function all() {
-      $videos = Video::all();
+      $videos = Video::orderBy('created_at', 'desc')->get();
       return response()->json($videos);
     }
 
