@@ -21,3 +21,15 @@ Route::get('/videos/{id}/edit', 'VideosController@edit');
 Route::post('/videos/{id}', 'VideosController@update');
 //route for deleting
 Route::delete('/videos/{id}', 'VideosController@destroy');
+
+
+Route::get('/users', 'UsersController@index');
+Route::get('/users/all', 'UsersController@all');
+//route for inserting
+Route::post('/users/create', 'UsersController@create');
+//route for edit
+Route::get('/users/{id}/edit', 'UsersController@edit');
+//route for updating
+Route::post('/users/{id}', 'UsersController@update');
+//route for deleting
+Route::delete('/users/{id}', 'UsersController@destroy');

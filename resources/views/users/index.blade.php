@@ -3,7 +3,7 @@
 @section('content')
 
 <input type="hidden" name="_token" id="csrf-token" value="{{ Session::token() }}" />
-<div id="js-video-content"></div>
-<script type="text/babel" src="{!! asset('js/Video.js') !!}"></script>
+<div id="js-user-content"></div>
+<script type="text/babel" src="{!! asset('js/User.js') !!}"></script>
 
 @stop

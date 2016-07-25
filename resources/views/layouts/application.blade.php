@@ -24,6 +24,8 @@
         </div>
         <div class="nav navbar-nav navbar-right">
           <li><a href="#">Home</a></li>
+          <li><a href="/">Videos</a></li>
+          <li><a href="/users">Users</a></li>
         </div>
       </div>
     </nav>
@@ -33,6 +35,5 @@
       @yield('content')
       <div class='js-scroll-bottom'></div>
     </div>
-    <script type="text/babel" src="{!! asset('js/Video.js') !!}"></script>
   </body>
 </html>
