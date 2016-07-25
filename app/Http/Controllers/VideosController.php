@@ -53,4 +53,9 @@ class VideosController extends Controller
         return response()->json($video);
       }
     }
+
+    public function destroy($id) {
+      Video::destroy($id);
+      return response(200);
+    }
 }

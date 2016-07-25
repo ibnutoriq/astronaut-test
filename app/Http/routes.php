@@ -16,8 +16,8 @@ Route::get('/videos/all', 'VideosController@all');
 //route for inserting
 Route::post('/videos/create', 'VideosController@create');
 //route for edit
-Route::get('/videos/:id/edit', 'VideosController@edit');
+Route::get('/videos/{id}/edit', 'VideosController@edit');
 //route for updating
-Route::patch('/videos/:id', 'VideosController@update');
+Route::patch('/videos/{id}', 'VideosController@update');
 //route for deleting
-Route::delete('/videos/:id', 'VideosController@destroy');
+Route::delete('/videos/{id}', 'VideosController@destroy');

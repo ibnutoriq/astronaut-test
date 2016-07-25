@@ -58,26 +58,19 @@ var VideoList = React.createClass({
       getVideosValue: []
     };
   },
-  displayPlayer: function() {
-    if (!_.isEmpty(this.state.getVideosValue)) {
-      this.state.getVideosValue.map(function(video, index) {
-        jwplayer('js-video-player' + video.id).setup({
-          file: '/videos/' + video.filename,
-          width: '245px',
-          height: '245px',
-        })
-      })
-    }
-  },
   displayList: function() {
     var videos;
     if (!_.isEmpty(this.state.getVideosValue)) {
       videos = this.state.getVideosValue.map(function(video, index) {
+        var re = /(?:\.([^.]+))?$/;
+        var ext = re.exec(video.filename)[1];
         return(
           <div className='col-md-3'>
             <div className='thumbnail video-wrap'>
               <div className='img-video'>
-                <div id={'js-video-player' + video.id}></div>
+                <video controls preload='metadata' width='245' height='245'>
+                  <source src={'videos/' + video.filename} type={'video/' + ext} />
+                </video>
               </div>
               <div className='title'>
                 <h4>{video.name}</h4>
@@ -87,7 +80,10 @@ var VideoList = React.createClass({
                   <a href='javascript:void(0)' className='btn btn-success'>edit</a>
                 </div>
                 <div className='btn-remove'>
-                  <a href='javascript:void(0)' className='btn btn-danger'>remove</a>
+                  <a
+                    href='javascript:void(0)'
+                    className='btn btn-danger js-video-remove'
+                    data-id={video.id} >remove</a>
                 </div>
               </div>
             </div>
@@ -101,12 +97,6 @@ var VideoList = React.createClass({
     this.setState({
       getVideosValue: nextProps.getVideosValue
     });
-  },
-  componentDidUpdate: function() {
-    this.displayPlayer();
-  },
-  componentDidMount: function() {
-    this.displayPlayer();
   },
   render: function() {
     return(
@@ -139,6 +129,7 @@ var Video = React.createClass({
     xhr.fail(this.fetchDataFail);
   },
   fetchDataDone: function(data, textStatus, jqXHR) {
+    this.resetForm();
     this.fetchVideoList();
     NProgress.done();
   },
@@ -176,8 +167,38 @@ var Video = React.createClass({
       getFilenameValue: e.target.files
     });
   },
+  handleRemoveClick: function() {
+    $(document).on('click', '.js-video-remove', function(e) {
+      $.ajax({
+        url: '/videos/' + e.target.dataset.id,
+        method: 'DELETE',
+        dataType: 'JSON',
+        beforeSend: function() {
+          NProgress.start();
+        }
+      })
+      .done(function(data, textStatus, jqXHR) {
+        this.fetchVideoList();
+        NProgress.done();
+      })
+    })
+  },
+  fetchRemoveDone: function(data, textStatus, jqXHR) {
+    console.log('asdf');
+    this.fetchVideoList();
+    NProgress.done();
+  },
+  fetchRemoveFail: function(xhr, status, err) {
+    console.log(err);
+    NProgress.done();
+  },
   componentDidMount: function() {
     this.fetchVideoList();
+    this.handleRemoveClick();
+  },
+  resetForm: function() {
+    $('#js-video-form')[0].reset();
+    $('.error-message').remove();
   },
   render: function() {
     return(
