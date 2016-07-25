@@ -56,6 +56,35 @@ class VideosController extends Controller
       }
     }
 
+    public function edit($id) {
+      $video = Video::find($id);
+      return response()->json($video);
+    }
+
+    public function update($id, Request $request) {
+      $video = Video::find($id);
+
+      $validator = Validator::make($request->all(), [
+        'name' => 'required',
+        'filename' => 'mimes:mp4,mov,ogg,qt,flv | max:200000'
+      ]);
+
+      $video->name = $request->input('name');
+
+      if ($request->file('filename') !== null) {
+        File::Delete('videos/' . $video->filename);
+        $fileName = Carbon::now() . '.' . $request->file('filename')->getClientOriginalExtension();
+        $request->file('filename')->move(
+          base_path() . '/public/videos/', $fileName
+        );
+        $video->filename = $fileName;
+      }
+
+      $video->save();
+
+      return response()->json($video);
+    }
+
     public function destroy($id) {
       $video = Video::find($id);
       File::Delete('videos/' . $video->filename);

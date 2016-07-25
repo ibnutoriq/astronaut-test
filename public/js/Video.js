@@ -22,30 +22,61 @@ var VideoForm = React.createClass({
       return false
     }
   },
+  decideFormBehavior: function() {
+    var getVideoValue = this.props.getVideoValue
+    if (!_.isEmpty(getVideoValue)) {
+      $('form').removeClass('js-video-form-add');
+      $('form').addClass('js-video-form-edit');
+      $('.js-video-name').val(getVideoValue.name);
+      $('.js-video-form-edit').attr('action', '/videos/' + getVideoValue.id);
+    } else {
+      $('form').removeClass('js-video-form-edit');
+      $('form').addClass('js-video-form-add');
+      $('.js-video-form-add').attr('action', '/videos/create');
+    }
+  },
+  decideSubmitBtn: function() {
+    if (!_.isEmpty(this.props.getVideoValue)) {
+      return(
+        <a href='javascript:void(0)'
+          className='btn btn-primary'
+          onClick={this.props.handleUpdateClick}>Submit</a>
+      );
+    } else {
+      return(
+        <a href='javascript:void(0)'
+          className='btn btn-primary'
+          onClick={this.props.handleSubmitClick}>Submit</a>
+      );
+    }
+  },
   componentWillReceiveProps: function(nextProps) {
     this.setState({
       getErrorsValue: nextProps.getErrorsValue
     });
   },
   componentDidMount: function() {
-    $('.js-video-csrf-token').val($('#csrf-token').val())
+    $('.js-video-csrf-token').val($('#csrf-token').val());
+  },
+  componentDidUpdate: function() {
+    this.decideFormBehavior();
   },
   render: function() {
     return(
-      <form className="form-horizontal" method="POST" action="/videos/create" encType="multipart/form-data" id="js-video-form">
+      <form className="form-horizontal js-video-form-add" method="POST" action="/videos/create" encType="multipart/form-data">
         <input type="hidden" name="_token" className='js-video-csrf-token' />
         <div className="form-group">
           <label htmlFor="inputName">Video name</label>
-          <input type="input" className="form-control" name="name" placeholder="Video name..." />
+          <input type="input" className="form-control js-video-name" name="name" placeholder="Video name..." />
           {this.validateName()}
         </div>
         <div className="form-group">
           <label htmlFor="inputFile">File input</label>
-          <input type="file" name="filename" />
+          <input type="file" className="js-video-filename" name="filename" />
           {this.validateFilename()}
         </div>
         <div className="form-group">
-          <a href='javascript:void(0)' className="btn btn-primary" onClick={this.props.handleSubmitClick}>Submit</a>
+          {this.decideSubmitBtn()}
         </div>
       </form>
     );
@@ -61,6 +92,7 @@ var VideoList = React.createClass({
   displayList: function() {
     var videos;
     var handleRemoveClick = this.props.handleRemoveClick
+    var handleEditClick = this.props.handleEditClick
     if (!_.isEmpty(this.state.getVideosValue)) {
       videos = this.state.getVideosValue.map(function(video, index) {
         var re = /(?:\.([^.]+))?$/;
@@ -78,14 +110,16 @@ var VideoList = React.createClass({
               </div>
               <div className='action-btn'>
                 <div className='btn-edit'>
-                  <a href='javascript:void(0)' className='btn btn-success'>edit</a>
+                  <a href='javascript:void(0)'
+                    className='btn btn-success'
+                    data-id={video.id}
+                    onClick={handleEditClick}>edit</a>
                 </div>
                 <div className='btn-remove'>
-                  <a
-                    href='javascript:void(0)'
+                  <a href='javascript:void(0)'
                     className='btn btn-danger js-video-remove'
                     data-id={video.id}
-                    onClick={handleRemoveClick} >remove</a>
+                    onClick={handleRemoveClick}>remove</a>
                 </div>
               </div>
             </div>
@@ -115,12 +149,24 @@ var Video = React.createClass({
   getInitialState: function() {
     return {
       getVideosValue: [],
+      getVideoValue: {},
       getFilenameValue: '',
       getErrorsValue: {}
     }
   },
   handleSubmitClick: function() {
-    var form = $('#js-video-form').ajaxSubmit({
+    var form = $('.js-video-form-add').ajaxSubmit({
+      beforeSubmit: function(arr, $form, options) {
+        NProgress.start();
+      }
+    });
+
+    var xhr = form.data('jqxhr');
+    xhr.done(this.fetchDataDone);
+    xhr.fail(this.fetchDataFail);
+  },
+  handleUpdateClick: function() {
+    var form = $('.js-video-form-edit').ajaxSubmit({
       beforeSubmit: function(arr, $form, options) {
         NProgress.start();
       }
@@ -132,6 +178,9 @@ var Video = React.createClass({
   },
   fetchDataDone: function(data, textStatus, jqXHR) {
     this.resetForm();
+    this.setState({
+      getVideoValue: {}
+    })
     this.fetchVideoList();
     NProgress.done();
   },
@@ -189,11 +238,40 @@ var Video = React.createClass({
     console.log(err);
     NProgress.done();
   },
+  handleEditClick: function(e) {
+    $.ajax({
+      url: '/videos/' + e.target.dataset.id + '/edit',
+      method: 'GET',
+      dataType: 'JSON',
+      beforeSend: function() {
+        NProgress.start();
+      }
+    })
+    .done(this.fetchEditDone)
+    .fail(this.fetchEditFail);
+  },
+  fetchEditDone: function(data, textStatus, jqXHR) {
+    $.scrollTo('.js-scroll-top', 500);
+    this.resetForm();
+    this.setState({
+      getVideoValue: data
+    });
+    NProgress.done();
+  },
+  fetchEditFail: function(xhr, status, err) {
+    console.log(err);
+    NProgress.done();
+  },
   componentDidMount: function() {
     this.fetchVideoList();
   },
   resetForm: function() {
-    $('#js-video-form')[0].reset();
+    if (!_.isEmpty(this.state.getVideoValue)) {
+      $('.js-video-form-edit')[0].reset();
+    } else {
+      $('.js-video-form-add')[0].reset();
+    }
+
     $('.error-message').remove();
   },
   render: function() {
@@ -202,8 +280,13 @@ var Video = React.createClass({
         <VideoForm
           handleSubmitClick={this.handleSubmitClick}
           handleFilenameChange={this.handleFilenameChange}
-          getErrorsValue={this.state.getErrorsValue} />
-        <VideoList getVideosValue={this.state.getVideosValue} handleRemoveClick={this.handleRemoveClick} />
+          getErrorsValue={this.state.getErrorsValue}
+          getVideoValue={this.state.getVideoValue}
+          handleUpdateClick={this.handleUpdateClick} />
+        <VideoList
+          getVideosValue={this.state.getVideosValue}
+          handleRemoveClick={this.handleRemoveClick}
+          handleEditClick={this.handleEditClick} />
       </div>
     );
   }

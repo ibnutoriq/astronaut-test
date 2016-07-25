@@ -18,6 +18,6 @@ Route::post('/videos/create', 'VideosController@create');
 //route for edit
 Route::get('/videos/{id}/edit', 'VideosController@edit');
 //route for updating
-Route::patch('/videos/{id}', 'VideosController@update');
+Route::post('/videos/{id}', 'VideosController@update');
 //route for deleting
 Route::delete('/videos/{id}', 'VideosController@destroy');
