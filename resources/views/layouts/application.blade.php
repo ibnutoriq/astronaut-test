@@ -14,6 +14,7 @@
     <script src="{!! asset('js/lodash.min.js') !!}"></script>
     <script src="{!! asset('js/nprogress.js') !!}"></script>
     <script src="{!! asset('js/jquery.form.js') !!}"></script>
+    <script src="{!! asset('js/jquery.scrollTo.min.js') !!}"></script>
   </head>
   <body>
     <nav class="navbar navbar-default">
@@ -28,8 +29,12 @@
     </nav>
 
     <div class="container">
+      <div class='js-scroll-top'></div>
       @yield('content')
+      <div class='js-scroll-bottom'></div>
     </div>
     <script type="text/babel" src="{!! asset('js/Video.js') !!}"></script>
+    <script src="{!! asset('js/jwplayer/jwplayer.js') !!}"></script>
+    <script>jwplayer.key="RTSDv/8Jo+yg5nqjnQYtNOLoiBz+sysfySSwqg==";</script>
   </body>
 </html>

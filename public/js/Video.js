@@ -1,4 +1,32 @@
 var VideoForm = React.createClass({
+  getInitialState: function() {
+    return {
+      getErrorsValue: this.props.getErrorsValue
+    };
+  },
+  validateName: function() {
+    if (!_.isEmpty(this.state.getErrorsValue.name)) {
+      return(
+        <div className="error-message">{this.state.getErrorsValue.name[0]}</div>
+      );
+    } else {
+      return false
+    }
+  },
+  validateFilename: function() {
+    if (!_.isEmpty(this.state.getErrorsValue.filename)) {
+      return(
+        <div className="error-message">{this.state.getErrorsValue.filename[0]}</div>
+      );
+    } else {
+      return false
+    }
+  },
+  componentWillReceiveProps: function(nextProps) {
+    this.setState({
+      getErrorsValue: nextProps.getErrorsValue
+    });
+  },
   componentDidMount: function() {
     $('.js-video-csrf-token').val($('#csrf-token').val())
   },
@@ -8,11 +36,13 @@ var VideoForm = React.createClass({
         <input type="hidden" name="_token" className='js-video-csrf-token' />
         <div className="form-group">
           <label htmlFor="inputName">Video name</label>
-          <input type="input" className="form-control js-video-name" name="name" placeholder="Video name..." />
+          <input type="input" className="form-control" name="name" placeholder="Video name..." />
+          {this.validateName()}
         </div>
         <div className="form-group">
           <label htmlFor="inputFile">File input</label>
-          <input type="file" className="js-video-filename" name="filename" />
+          <input type="file" name="filename" />
+          {this.validateFilename()}
         </div>
         <div className="form-group">
           <a href='javascript:void(0)' className="btn btn-primary" onClick={this.props.handleSubmitClick}>Submit</a>
@@ -28,6 +58,17 @@ var VideoList = React.createClass({
       getVideosValue: []
     };
   },
+  displayPlayer: function() {
+    if (!_.isEmpty(this.state.getVideosValue)) {
+      this.state.getVideosValue.map(function(video, index) {
+        jwplayer('js-video-player' + video.id).setup({
+          file: '/videos/' + video.filename,
+          width: '245px',
+          height: '245px',
+        })
+      })
+    }
+  },
   displayList: function() {
     var videos;
     if (!_.isEmpty(this.state.getVideosValue)) {
@@ -36,10 +77,10 @@ var VideoList = React.createClass({
           <div className='col-md-3'>
             <div className='thumbnail video-wrap'>
               <div className='img-video'>
-                <img src={"/videos/" + video.filename} />
+                <div id={'js-video-player' + video.id}></div>
               </div>
               <div className='title'>
-                <h4>video.name</h4>
+                <h4>{video.name}</h4>
               </div>
               <div className='action-btn'>
                 <div className='btn-edit'>
@@ -61,6 +102,12 @@ var VideoList = React.createClass({
       getVideosValue: nextProps.getVideosValue
     });
   },
+  componentDidUpdate: function() {
+    this.displayPlayer();
+  },
+  componentDidMount: function() {
+    this.displayPlayer();
+  },
   render: function() {
     return(
       <div className='row'>
@@ -76,14 +123,11 @@ var Video = React.createClass({
   getInitialState: function() {
     return {
       getVideosValue: [],
-      getFilenameValue: ''
+      getFilenameValue: '',
+      getErrorsValue: {}
     }
   },
   handleSubmitClick: function() {
-    var csrfToken = $('input[name="_token"]').val();
-    var name = $('.js-video-name').val();
-    var filename = $('.js-video-filename').val();
-
     var form = $('#js-video-form').ajaxSubmit({
       beforeSubmit: function(arr, $form, options) {
         NProgress.start();
@@ -92,18 +136,21 @@ var Video = React.createClass({
 
     var xhr = form.data('jqxhr');
     xhr.done(this.fetchDataDone);
-    xhr.done(this.fetchDataFail);
+    xhr.fail(this.fetchDataFail);
   },
   fetchDataDone: function(data, textStatus, jqXHR) {
     var videos = this.state.getVideosValue;
-    videos.push(data);
+    videos.unshift(data);
     this.setState({
       getVideosValue: videos
     });
     NProgress.done();
   },
-  fetchDataFail: function(xhr, status, err) {
-    console.log(err);
+  fetchDataFail: function(errors) {
+    this.setState({
+      getErrorsValue: errors.responseJSON
+    })
+    $.scrollTo('.js-scroll-top', 500);
     NProgress.done();
   },
   fetchVideoList: function() {
@@ -139,7 +186,10 @@ var Video = React.createClass({
   render: function() {
     return(
       <div className='container'>
-        <VideoForm handleSubmitClick={this.handleSubmitClick} handleFilenameChange={this.handleFilenameChange} />
+        <VideoForm
+          handleSubmitClick={this.handleSubmitClick}
+          handleFilenameChange={this.handleFilenameChange}
+          getErrorsValue={this.state.getErrorsValue} />
         <VideoList getVideosValue={this.state.getVideosValue} />
       </div>
     );

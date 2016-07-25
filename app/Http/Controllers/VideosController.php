@@ -30,11 +30,11 @@ class VideosController extends Controller
     public function create(Request $request) {
       $validator = Validator::make($request->all(), [
         'name' => 'required',
-        'filename' => 'required'
+        'filename' => 'required | mimes:mp4,mov,ogg,qt,flv | max:200000'
       ]);
 
       if ($validator->fails()) {
-        return response()->json($validator->errors());
+        return response()->json($validator->errors(), 401);
       } else {
         $fileName = Carbon::now() . '.' . $request->file('filename')->getClientOriginalExtension();
 
