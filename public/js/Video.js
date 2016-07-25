@@ -60,6 +60,7 @@ var VideoList = React.createClass({
   },
   displayList: function() {
     var videos;
+    var handleRemoveClick = this.props.handleRemoveClick
     if (!_.isEmpty(this.state.getVideosValue)) {
       videos = this.state.getVideosValue.map(function(video, index) {
         var re = /(?:\.([^.]+))?$/;
@@ -83,7 +84,8 @@ var VideoList = React.createClass({
                   <a
                     href='javascript:void(0)'
                     className='btn btn-danger js-video-remove'
-                    data-id={video.id} >remove</a>
+                    data-id={video.id}
+                    onClick={handleRemoveClick} >remove</a>
                 </div>
               </div>
             </div>
@@ -167,24 +169,19 @@ var Video = React.createClass({
       getFilenameValue: e.target.files
     });
   },
-  handleRemoveClick: function() {
-    $(document).on('click', '.js-video-remove', function(e) {
-      $.ajax({
-        url: '/videos/' + e.target.dataset.id,
-        method: 'DELETE',
-        dataType: 'JSON',
-        beforeSend: function() {
-          NProgress.start();
-        }
-      })
-      .done(function(data, textStatus, jqXHR) {
-        this.fetchVideoList();
-        NProgress.done();
-      })
+  handleRemoveClick: function(e) {
+    $.ajax({
+      url: '/videos/' + e.target.dataset.id,
+      method: 'DELETE',
+      dataType: 'JSON',
+      beforeSend: function() {
+        NProgress.start();
+      }
     })
+    .done(this.fetchRemoveDone)
+    .fail(this.fetchRemoveFail);
   },
   fetchRemoveDone: function(data, textStatus, jqXHR) {
-    console.log('asdf');
     this.fetchVideoList();
     NProgress.done();
   },
@@ -207,7 +204,7 @@ var Video = React.createClass({
           handleSubmitClick={this.handleSubmitClick}
           handleFilenameChange={this.handleFilenameChange}
           getErrorsValue={this.state.getErrorsValue} />
-        <VideoList getVideosValue={this.state.getVideosValue} />
+        <VideoList getVideosValue={this.state.getVideosValue} handleRemoveClick={this.handleRemoveClick} />
       </div>
     );
   }
