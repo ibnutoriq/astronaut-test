@@ -13,6 +13,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
     <script src="{!! asset('js/lodash.min.js') !!}"></script>
     <script src="{!! asset('js/nprogress.js') !!}"></script>
+    <script src="{!! asset('js/jquery.form.js') !!}"></script>
   </head>
   <body>
     <nav class="navbar navbar-default">

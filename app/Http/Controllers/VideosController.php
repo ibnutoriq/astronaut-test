@@ -6,6 +6,8 @@ use Log;
 
 use Validator;
 
+use Carbon\Carbon;
+
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
@@ -21,29 +23,31 @@ class VideosController extends Controller
 
     // This page contain list of videos
     public function all() {
-      return response()->json(['name' => 'Abigail', 'state' => 'CA']);
+      $videos = Video::all();
+      return response()->json($videos);
     }
 
     public function create(Request $request) {
       $validator = Validator::make($request->all(), [
         'name' => 'required',
-        'video_file' => 'required'
+        'filename' => 'required'
       ]);
 
       if ($validator->fails()) {
         return response()->json($validator->errors());
       } else {
+        $fileName = Carbon::now() . '.' . $request->file('filename')->getClientOriginalExtension();
+
         $video = new Video(array(
-          'name' => $request->get('name')
+          'name' => $request->get('name'),
+          'filename' => $fileName
         ));
 
         $video->save();
 
-        $imageName = $video->id . '.' .
-          $request->file('video_file')->getClientOriginalExtension();
 
-        $request->file('video_file')->move(
-          base_path() . '/public/videos/', $imageName
+        $request->file('filename')->move(
+          base_path() . '/public/videos/', $fileName
         );
 
         return response()->json($video);
